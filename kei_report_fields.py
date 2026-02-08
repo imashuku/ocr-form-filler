@@ -242,11 +242,11 @@ FIELD_D_FORMER = {
         "font_size": 10,
         "label": "旧使用者氏名"
     },
-    "D5_principal_location": {  # 主たる定置場（市町村名）
+    "D5_old_principal_location": {  # 主たる定置場（旧）（市町村名）
         "x": 755, "y": 350,
         "font_size": 10,
         "max_width": 65,
-        "label": "主たる定置場"
+        "label": "主たる定置場（旧）"
     },
 }
 

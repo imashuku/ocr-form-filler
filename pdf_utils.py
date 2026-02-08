@@ -4,6 +4,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, A4, landscape
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+from reportlab.lib.utils import ImageReader
 from pypdf import PdfReader, PdfWriter
 
 # 日本語フォントの登録 (HeiseiMin-W3 は標準的な日本語フォントの一つです)
@@ -179,6 +180,77 @@ def create_blank_pdf_with_text(
         print(f"成功: 白紙PDFファイルを保存しました -> {output_pdf_path}")
         return True
 
+    except Exception as e:
+        print(f"エラーが発生しました: {e}")
+        return False
+
+def create_pdf_with_text_on_image(
+    output_pdf_path: str,
+    fields: List[Dict[str, Union[str, int, float]]],
+    image_path: str,
+    pagesize=(840, 593)
+):
+    """
+    画像を背景にして、その上にテキストを配置したPDFを作成します。
+    （座標確認やテスト出力用）
+
+    Args:
+        output_pdf_path: 保存先のPDFファイルのパス。
+        fields: 埋め込むテキスト情報のリスト。
+        image_path: 背景に使用する画像のパス。
+        pagesize: ページサイズ (デフォルト: (840, 593))。
+    """
+    try:
+        c = canvas.Canvas(output_path=output_pdf_path, pagesize=pagesize)
+        
+        # 画像を描画
+        try:
+            img = ImageReader(image_path)
+            c.drawImage(img, 0, 0, width=pagesize[0], height=pagesize[1])
+        except Exception as e:
+            print(f"画像読み込みエラー: {e}")
+            # 画像がない場合は白背景
+            c.setFillColorRGB(1, 1, 1)
+            c.rect(0, 0, pagesize[0], pagesize[1], stroke=0, fill=1)
+        
+        # テキストを描画
+        c.setFillColorRGB(0, 0, 0)
+        
+        for field in fields:
+            field_type = field.get('type', 'text')
+            
+            c.saveState()
+            
+            if field_type == 'text':
+                text = field.get('text', '')
+                x = field.get('x', 0)
+                y = field.get('y', 0)
+                font_size = field.get('font_size', 12)
+                font_name = field.get('font_name', 'HeiseiMin-W3')
+                
+                c.setFont(font_name, font_size)
+                
+                # テスト用に見やすくするために赤色にするオプションがあっても良いかも
+                # color = field.get('color', None)
+                # if color: c.setFillColorRGB(*color)
+                
+                c.drawString(x, y, str(text))
+                
+            elif field_type == 'rect':
+                x = field.get('x', 0)
+                y = field.get('y', 0)
+                w = field.get('width', 0)
+                h = field.get('height', 0)
+                stroke = field.get('stroke', 0)
+                fill = field.get('fill', 1)
+                c.rect(x, y, w, h, stroke=stroke, fill=fill)
+
+            c.restoreState()
+            
+        c.save()
+        print(f"成功: 画像付きPDFを保存しました -> {output_pdf_path}")
+        return True
+        
     except Exception as e:
         print(f"エラーが発生しました: {e}")
         return False

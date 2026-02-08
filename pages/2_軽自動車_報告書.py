@@ -131,10 +131,10 @@ with st.expander("D. 旧所有者・旧使用者", expanded=False):
         data["D3_former_user_address"] = st.text_input("旧使用者 住所", value="愛知県一宮市木曽川町外割田")
         data["D4_former_user_name"] = st.text_input("旧使用者 氏名", value="小笠原 崇")
     
-    # 旧使用者住所から市町村名を自動抽出（主たる定置場）
+    # 旧使用者住所から市町村名を自動抽出（主たる定置場（旧））
     extracted_city = extract_city_from_address(data["D3_former_user_address"])
-    data["D5_principal_location"] = st.text_input(
-        "主たる定置場（自動抽出）", 
+    data["D5_old_principal_location"] = st.text_input(
+        "主たる定置場（旧）（自動抽出）", 
         value=extracted_city,
         help="旧使用者住所から市町村名を自動抽出しています。必要に応じて編集可能です。"
     )
