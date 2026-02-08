@@ -242,6 +242,12 @@ FIELD_D_FORMER = {
         "font_size": 10,
         "label": "旧使用者氏名"
     },
+    "D5_principal_location": {  # 主たる定置場（市町村名）
+        "x": 755, "y": 350,
+        "font_size": 10,
+        "max_width": 65,
+        "label": "主たる定置場"
+    },
 }
 
 # ============================================================
@@ -351,3 +357,49 @@ def get_field_list_for_pdf(data: dict) -> list:
             })
     
     return result
+
+
+def extract_city_from_address(address: str) -> str:
+    """
+    住所から市町村名を抽出する
+    
+    対応パターン:
+    - 〇〇県〇〇市... → 〇〇市
+    - 〇〇県〇〇郡〇〇町... → 〇〇町
+    - 〇〇県〇〇郡〇〇村... → 〇〇村
+    - 〇〇府〇〇市... → 〇〇市
+    - 東京都〇〇区... → 〇〇区
+    - 東京都〇〇市... → 〇〇市
+    
+    Args:
+        address: 住所文字列
+    
+    Returns:
+        市町村名（見つからない場合は空文字）
+    """
+    import re
+    
+    if not address:
+        return ""
+    
+    # パターン1: 〇〇市
+    match = re.search(r'([^都道府県]+?市)', address)
+    if match:
+        return match.group(1)
+    
+    # パターン2: 〇〇区（東京23区）
+    match = re.search(r'([^都道府県]+?区)', address)
+    if match:
+        return match.group(1)
+    
+    # パターン3: 〇〇郡〇〇町
+    match = re.search(r'([^郡]+?町)', address)
+    if match:
+        return match.group(1)
+    
+    # パターン4: 〇〇郡〇〇村
+    match = re.search(r'([^郡]+?村)', address)
+    if match:
+        return match.group(1)
+    
+    return ""
