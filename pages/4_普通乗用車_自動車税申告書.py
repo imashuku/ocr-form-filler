@@ -339,6 +339,9 @@ with col_o5:
 # PDF生成
 # ============================================================
 st.markdown("---")
+# 印刷設定
+print_mode = st.radio("印刷モード", ["提出用（白紙・データのみ）", "確認用（テンプレート背景あり）"], horizontal=True)
+
 if st.button("📄 PDF作成", type="primary"):
     # 出力ファイル名
     if report_type == "発（転入）":
@@ -354,16 +357,20 @@ if st.button("📄 PDF作成", type="primary"):
         # フィールドリスト生成
         fields = get_car_tax_field_list(data)
         
+        # テンプレート使用フラグ
+        use_template = (print_mode == "確認用（テンプレート背景あり）") and os.path.exists(template_path)
+        
         # PDF生成
-        if os.path.exists(template_path):
+        if use_template:
             # テンプレートPDFがある場合は重ね合わせ
             embed_text_to_pdf(template_path, output_pdf, fields, pagesize=PAGE_SIZE)
             st.success(f"✅ テンプレートを使用して {report_type}用PDFを作成しました！")
         else:
-            # テンプレートがない場合は白紙
+            # テンプレートを使わない（白紙データのみ）
             create_blank_pdf_with_text(output_pdf, fields, pagesize=PAGE_SIZE)
-            st.warning(f"⚠️ テンプレートが見つからないため白紙で作成しました: {template_path}")
-            st.success(f"✅ {report_type}用PDF作成（白紙）")
+            if print_mode == "確認用（テンプレート背景あり）":
+                st.warning("⚠️ テンプレートファイルが見つからないため、白紙で作成しました。")
+            st.success(f"✅ {report_type}用PDFを作成しました（提出用）")
         
         # ダウンロードボタン
         with open(output_pdf, "rb") as f:
